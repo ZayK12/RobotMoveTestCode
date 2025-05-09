@@ -20,14 +20,15 @@ int main() {
         {13,17},
         {14,18}
     }; // Example path
-    std::vector<double> position = { 2, 5 }; // Example position
+	std::vector<double> Initialposition = { 2, 5 }; // Initial Position, DO NOT USE AFTER DECLARING WITHIN ODOMETRY CLASS
     double lookAhead = 10.0; // Example look ahead distance
     double wheelCircumference = 0.5; // Example wheel circumference
     pathManager activePath = pathManager(path); // Example path manager
-    odometry roboOdom = odometry(position, 0, wheelCircumference, 2, 2, 2); // Example odometry @todo 
-    Pursuit roboPursuit = Pursuit(activePath.getPathPointer(), &position, lookAhead); // Example pure pursuit
+    odometry roboOdom = odometry(Initialposition, 0, wheelCircumference, 2, 2, 2); // Example odometry @todo 
+    Pursuit roboPursuit = Pursuit(activePath.getPathPointer(), roboOdom.getPositionPointer(), lookAhead); // Example pure pursuit
 
-	roboOdom.updatePosition(3, 7); // Update the robot's position
+    
+	
     std::vector<double> pursuitPoint = roboPursuit.updatePursuitPoint(); // Example pursuit point calculation
     std::cout << "Pursuit Point: (" << pursuitPoint[0] << ", " << pursuitPoint[1] << ")" << std::endl; // Output the pursuit point
 

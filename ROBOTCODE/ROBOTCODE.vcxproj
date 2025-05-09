@@ -133,6 +133,7 @@
     <ClCompile Include="ROBOTCODE.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
     <ClInclude Include="odometry.h" />
     <ClInclude Include="pathManager.h" />
     <ClInclude Include="purePursuit.h" />

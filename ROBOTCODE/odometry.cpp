@@ -8,12 +8,15 @@
 #include <string>
 
 
-odometry::odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack) : position(initPos), orientation(initOrientation), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), pi(3.14159265359) {}
-odometry::odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack) : position({ 0,0 }), orientation(0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), pi(3.14159265359) {}
+odometry::odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack) : MainPosition(initPos), orientation(initOrientation), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition) {}
+odometry::odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack) : MainPosition({ 0,0 }), orientation(0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition){}
 
+std::vector<double>* odometry::getPositionPointer() {
+	return directPositionPtr;
+}
 void odometry::odometry::updatePosition(double newX, double newY) {
-	position[0] = newX;
-	position[1] = newY;
+	MainPosition[0] = newX;
+	MainPosition[1] = newY;
 }
 
 double odometry::overflowCheck(double deg) {
@@ -82,7 +85,7 @@ void odometry::rotateToGlobalFrame() {
 	cartesianToPolar(localOffset);
 	localOffset[1] = localOffset[1] - orientation;
 	polarToCartesian(localOffset[0], localOffset[1]);
-	position[0] += localOffset[0]; //global pos
-	position[1] += localOffset[1]; //global pos
+	MainPosition[0] += localOffset[0]; //global pos
+	MainPosition[1] += localOffset[1]; //global pos
 }
 

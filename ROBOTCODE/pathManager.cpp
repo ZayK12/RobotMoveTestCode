@@ -21,8 +21,8 @@ int pathManager::clearPath() {
 }
 int pathManager::setActivePath(std::vector<std::vector<double>>& newPath) {
     if (pathPointer && !newPath.empty()) {
-        pathPointer->clear();
-        *pathPointer = newPath;
+        clearPath();
+        pathPointer->swap(newPath);
     }
     return 0; //Deletes old vectors
 }

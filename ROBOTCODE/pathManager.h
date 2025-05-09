@@ -59,7 +59,7 @@ public:
 
     std::vector<std::vector<double> > mainPath;
 private:
-    std::vector<std::vector<double> >* pathPointer;
+    std::vector<std::vector<double> >* pathPointer; //Direct Pointer to the mainPath
 
 };
 

@@ -1,5 +1,6 @@
 #ifndef odometry_H
 #define odometry_H
+const double pi = 3.14159265359;
 #include <cmath>
 #include <iostream>
 #include <array>
@@ -45,16 +46,19 @@ public:
      * @param newY new Y value */
     void updatePosition(double newX, double newY);
 
+
+    std::vector<double>* getPositionPointer();
     
-    std::vector<double> position;
-    double orientation;
+    std::vector<double> MainPosition;
 private:
     
+    std::vector<double>* directPositionPtr;
+    double orientation;
     const double disL;
     const double disR;
     const double disB;
     const double wheelCircum;
-    const double pi;
+    
     std::vector<double> localOffset;
     /**
      * @brief  This function is to prevent the IMU to return a rotation of 360 as 0 is preferred
