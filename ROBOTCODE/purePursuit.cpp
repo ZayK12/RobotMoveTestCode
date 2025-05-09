@@ -60,11 +60,9 @@ std::vector<std::vector<double>> Pursuit::hitPoints(std::vector<double> p1, std:
 }
 
 bool Pursuit::inLimit(std::vector<double> startPoint, std::vector<double> endPoint, std::vector<double> sol1) {
-    if (distance(startPoint, sol1) + distance(sol1, endPoint) == distance(startPoint, endPoint)) {
+    if (fabs(distance(startPoint, sol1) + distance(sol1, endPoint) - distance(startPoint, endPoint)) < TOLERANCE) {
         return true;
     }
-
-
     return false;
 }
 
@@ -80,12 +78,13 @@ std::vector<double> Pursuit::updatePursuitPoint() {
 
     const auto& path = **pathPointer;          // 5/7 Derefrences the path vector to increase performance 
     const auto& position = *positionPointer;  // 5/7 Derefrences the position vector to increase performance 
-
+ 
+    
     double distanceToEnd = distance(path[path.size() - 1], position);
     if (lookAhead > distanceToEnd) {
         return path[path.size() - 1];
     }
-    for (int i = 0 + startIndex; i < path.size() - 1; i++) {
+    for (int i = 0; i < path.size() - 1; i++) {
         //convert points to local arrays
         std::vector<double> lPoint0 = { path[i][0] - position[0], path[i][1] - position[1] };
         std::vector<double> lPoint1 = { path[i + 1][0] - position[0], path[i + 1][1] - position[1] };
@@ -96,7 +95,7 @@ std::vector<double> Pursuit::updatePursuitPoint() {
         //abs distance between both points
         DisR = sqrt(pow(DisX, 2) + pow(DisY, 2));
         discrim = findDiscrim(lPoint0, lPoint1, DisR, determinant);
-        if (discrim < 0) { continue; } // Discrim being 0 means the circle is not on the line, so it continues to the next point.
+        if (discrim < -TOLERANCE) { continue; } // Discrim being 0 means the circle is not on the line, so it continues to the next point.
 
         //Function to find where it hit the line
         std::vector<std::vector<double>> solutionsLocal = hitPoints(lPoint0, lPoint1, discrim, determinant, DisX, DisY, DisR);
@@ -137,6 +136,9 @@ std::vector<double> Pursuit::updatePursuitPoint() {
             return gSolution;
         }
 
+    }
+    for (int i = 0; i < path.size(); i++) {
+        std::cout << "X:" << path[i][0] << " Y:" << path[i][0] << std::endl;
     }
     return path[path.size() - 1];
 }

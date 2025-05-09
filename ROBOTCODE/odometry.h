@@ -45,9 +45,11 @@ public:
      * @param newY new Y value */
     void updatePosition(double newX, double newY);
 
+    
     std::vector<double> position;
     double orientation;
 private:
+    
     const double disL;
     const double disR;
     const double disB;

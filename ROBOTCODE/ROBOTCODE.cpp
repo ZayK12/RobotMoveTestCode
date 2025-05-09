@@ -27,16 +27,17 @@ int main() {
     odometry roboOdom = odometry(position, 0, wheelCircumference, 2, 2, 2); // Example odometry @todo 
     Pursuit roboPursuit = Pursuit(activePath.getPathPointer(), &position, lookAhead); // Example pure pursuit
 
+	roboOdom.updatePosition(3, 7); // Update the robot's position
     std::vector<double> pursuitPoint = roboPursuit.updatePursuitPoint(); // Example pursuit point calculation
     std::cout << "Pursuit Point: (" << pursuitPoint[0] << ", " << pursuitPoint[1] << ")" << std::endl; // Output the pursuit point
 
     std::vector<std::vector<double> > pathPlusOne = {
         {4,7},
         {5,8},
+        {6,9},
         {7,10},
         {8,11},
-        {9,12},        
-        {6,9},
+        {9,12},
         {10,13},
         {11,14},
         {12,15},

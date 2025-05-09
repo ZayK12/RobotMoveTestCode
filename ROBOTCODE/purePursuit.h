@@ -1,7 +1,15 @@
+///@file purePursuit.h
+///@brief This is the header file for the pure pursuit algorithm.
 ///@author Zayyaan K
 ///@date 4/17/25
 #ifndef purePursuit_H
 #define purePursuit_H
+
+/// <summary>
+/// Floating point imperfection, especailly at this level creates problems, on 5/9/25 I added this tolerance for whenever you are subtracting two floating point numbers.
+/// </summary>
+const double TOLERANCE = 1e-6; //Tolerance for floating point comparisons
+
 #include <cmath>
 #include <iostream>
 #include <array>
