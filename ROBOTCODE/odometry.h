@@ -46,7 +46,11 @@ public:
      * @param newY new Y value */
     void updatePosition(double newX, double newY);
 
-
+    /**
+    * @author Zayyaan K
+	* @date 5/9/25
+    * @brief Gets the pointer to the position vector
+	* @return pointer to the position vector */
     std::vector<double>* getPositionPointer();
     
     std::vector<double> MainPosition;

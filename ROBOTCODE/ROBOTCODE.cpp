@@ -5,6 +5,7 @@
 #include "purePursuit.h"
 #include "odometry.h"
 #include "pathManager.h"
+#include "config.h"
 int main() {
     std::vector<std::vector<double> > path = {
         {3,7},
@@ -20,11 +21,9 @@ int main() {
         {13,17},
         {14,18}
     }; // Example path
-	std::vector<double> Initialposition = { 2, 5 }; // Initial Position, DO NOT USE AFTER DECLARING WITHIN ODOMETRY CLASS
     double lookAhead = 10.0; // Example look ahead distance
-    double wheelCircumference = 0.5; // Example wheel circumference
     pathManager activePath = pathManager(path); // Example path manager
-    odometry roboOdom = odometry(Initialposition, 0, wheelCircumference, 2, 2, 2); // Example odometry @todo 
+    odometry roboOdom = odometry(config::INITIAL_POSITION, config::INITIAL_ORIENTATION, config::WHEEL_CIRCUMFERENCE, config::ENCODER_DISTANCE_LEFT, config::ENCODER_DISTANCE_RIGHT, config::ENCODER_DISTANCE_BACK); // Example odometry @todo 
     Pursuit roboPursuit = Pursuit(activePath.getPathPointer(), roboOdom.getPositionPointer(), lookAhead); // Example pure pursuit
 
     
