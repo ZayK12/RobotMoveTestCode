@@ -47,6 +47,13 @@ public:
     void updatePosition(double newX, double newY);
 
     /**
+     * @author Zayyaan K
+     * @date 5/9/25
+     * @brief Updates position values w/ changing ram values using a vector
+     * @param newPos new position. */
+    void updatePosition(std::vector<double> newPos);
+
+    /**
     * @author Zayyaan K
 	* @date 5/9/25
     * @brief Gets the pointer to the position vector

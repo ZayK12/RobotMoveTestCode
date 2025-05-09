@@ -18,6 +18,10 @@ void odometry::odometry::updatePosition(double newX, double newY) {
 	MainPosition[0] = newX;
 	MainPosition[1] = newY;
 }
+void odometry::updatePosition(std::vector<double> newPos) {
+	MainPosition[0] = newPos[0];
+	MainPosition[1] = newPos[1];
+}
 
 double odometry::overflowCheck(double deg) {
 	if (deg == 360) {
