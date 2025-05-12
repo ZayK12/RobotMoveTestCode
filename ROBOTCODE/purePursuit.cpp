@@ -151,10 +151,8 @@ std::vector<double> Pursuit::updatePursuitPoint() {
 			pursuitPoint[1] += position[1];
 			return pursuitPoint;
 		}
-		else { //if both solutions are out of limit
-			return pursuitPoint;
+		
 			
 
-    }
-    return path[path.size() - 1];
+    return pursuitPoint;
 }
