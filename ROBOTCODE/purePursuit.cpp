@@ -12,7 +12,7 @@
 
 
 
-Pursuit::Pursuit(std::vector<std::vector<double>>** p, std::vector<double>* pos, double LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA) {}
+Pursuit::Pursuit(std::vector<std::vector<double>>** p, std::vector<double>* pos, double LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA), pursuitPoint({ 0,0 }) {}
 
 
 void Pursuit::setLookAhead(double newLKA) {
@@ -109,36 +109,52 @@ std::vector<double> Pursuit::updatePursuitPoint() {
         //If both are within limits decides what point to go with. Also updates the startIndex variable
         if (solution1InLimit && solution2InLimit) {
             //Finds the closest point 
-            std::vector<double> gSolution = closestPoint(lPoint1, solutionsLocal);
-
             //the if statement below is to prevent the search algorithm from targeting segments the robot has already traveled.
-            if (distance(gSolution, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
+            std::vector<double> lclosestPoint = closestPoint(lPoint1, solutionsLocal);
+            pursuitPoint[0] = lclosestPoint[0];
+			pursuitPoint[1] = lclosestPoint[1];
+            if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
+                startIndex = i;
+                //break;
+            }
+            else {
+                startIndex = i + 1;
+                //continue;
+            }
+            
+            return pursuitPoint;
+            
+            
+            
+        }
+        else if (solution1InLimit && !solution2InLimit) { //if solution1 is in limit and solution 2 isn't
+            pursuitPoint = solutionsLocal[0];
+            if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
                 startIndex = i;
             }
             else {
                 startIndex = i + 1;
             }
-            gSolution[1] += position[1];
-            gSolution[0] += position[0];
-            return gSolution;
+            pursuitPoint[0] += position[0];
+            pursuitPoint[1] += position[1];
+            return pursuitPoint;
         }
-        else if (solution1InLimit && !solution2InLimit) //if solution1 is in limit and solution 2 isn't
-        {
-            std::vector<double> gSolution = solutionsLocal[0];
-            if (distance(gSolution, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
-                startIndex = i;
-            }
-            else {
-                startIndex = i + 1;
-            }
-            gSolution[0] += position[0];
-            gSolution[1] += position[1];
-            return gSolution;
-        }
+		else if (!solution1InLimit && solution2InLimit) { //if solution2 is in limit and solution 1 isn't
+			pursuitPoint = solutionsLocal[1];
+			if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
+				startIndex = i;
+			}
+			else {
+				startIndex = i + 1;
+			}
+			pursuitPoint[0] += position[0];
+			pursuitPoint[1] += position[1];
+			return pursuitPoint;
+		}
+		else { //if both solutions are out of limit
+			return pursuitPoint;
+			
 
-    }
-    for (int i = 0; i < path.size(); i++) {
-        std::cout << "X:" << path[i][0] << " Y:" << path[i][0] << std::endl;
     }
     return path[path.size() - 1];
 }
