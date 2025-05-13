@@ -33,11 +33,13 @@ public:
     /// @brief mutator method for lookAhead paramater
     /// @param newLKA the new value for lookAhead.
     void setLookAhead(double newLKA);
+
+    std::vector<double> pursuitPoint = { 0.0, 0.0 }; // the set pursuit point, initialized at 0,0 to prevent errors
+	
 private:
     double lookAhead;
 	std::vector<std::vector<double> >** pathPointer; // pointer to the path
 	std::vector<double>* positionPointer; // pointer to the robot position
-	std::vector<double> pursuitPoint = { 0.0, 0.0 }; // the current point to pursue, it is 0,0 by default.
 
 
     /// @author Zayyyan K

@@ -8,47 +8,47 @@
 #include "config.h"
 int main() {
     std::vector<std::vector<double> > path = {
-        {3,7},
-        {4,8},
-        {5,9},
-        {6,10},
-        {7,11},
-        {8,12},
-        {9,13},
-        {10,14},
-        {11,15},
-        {12,16},
-        {13,17},
-        {14,18}
+        {3,7, 100},
+        {4,8, 50},
+        {5,9, 100},
+        {6,10, 80},
+        {7,11, 20},
+        {8,12, 82},
+        {9,13, 96},
+        {10,14, 45},
+        {11,15, 75},
+        {12,16, 75},
+        {13,17, 75},
+        {14,18, 75}
     }; // Example path
-    double lookAhead = 10.0; // Example look ahead distance
+    double lookAhead = 8.4; // Example look ahead distance
     pathManager activePath = pathManager(path); // Example path manager
     odometry roboOdom = odometry(config::INITIAL_POSITION, config::INITIAL_ORIENTATION, config::WHEEL_CIRCUMFERENCE, config::ENCODER_DISTANCE_LEFT, config::ENCODER_DISTANCE_RIGHT, config::ENCODER_DISTANCE_BACK); // Example odometry @todo 
     Pursuit roboPursuit = Pursuit(activePath.getPathPointer(), roboOdom.getPositionPointer(), lookAhead); // Example pure pursuit
-
+    std::vector<double>* pursuitPointer = &roboPursuit.pursuitPoint;
     
 	
-    std::vector<double> pursuitPoint = roboPursuit.updatePursuitPoint(); // Example pursuit point calculation
-    std::cout << "Pursuit Point: (" << pursuitPoint[0] << ", " << pursuitPoint[1] << ")" << std::endl; // Output the pursuit point
+    roboPursuit.updatePursuitPoint(); // Example pursuit point calculation
+    std::cout << "Pursuit Point: (" << (*pursuitPointer)[0] << ", " << (*pursuitPointer)[1] << ") Max Speed:" << (*pursuitPointer)[2] << std::endl; // Output the pursuit point
 
     std::vector<std::vector<double> > pathPlusOne = {
-        {4,7},
-        {5,8},
-        {6,9},
-        {7,10},
-        {8,11},
-        {9,12},
-        {10,13},
-        {11,14},
-        {12,15},
-        {13,16},
-        {14,17},
-        {15,18}
+        {4,7, 100},
+        {5,8, 100},
+        {6,9, 100},
+        {7,10, 100},
+        {8,11, 100},
+        {9,12, 100},
+        {10,13, 100},
+        {11,14, 90},
+        {12,15, 80},
+        {13,16, 70},
+        {14,17, 60},
+        {15,18, 50}
     }; // Example path
 
 	activePath.setActivePath(pathPlusOne); //breaks it for some reason
-    pursuitPoint = roboPursuit.updatePursuitPoint(); // Example pursuit point calculation
-    std::cout << "Pursuit Point: (" << pursuitPoint[0] << ", " << pursuitPoint[1] << ")" << std::endl; // Output the pursuit point
+    roboPursuit.updatePursuitPoint(); // Example pursuit point calculation
+    std::cout << "Pursuit Point: (" << (*pursuitPointer)[0] << ", " << (*pursuitPointer)[1] << ") Max Speed:" << (*pursuitPointer)[2]  << std::endl; // Output the pursuit point
     return 0;
 }
 

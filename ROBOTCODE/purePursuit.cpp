@@ -12,7 +12,7 @@
 
 
 
-Pursuit::Pursuit(std::vector<std::vector<double>>** p, std::vector<double>* pos, double LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA), pursuitPoint({ 0,0 }) {}
+Pursuit::Pursuit(std::vector<std::vector<double>>** p, std::vector<double>* pos, double LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA), pursuitPoint({ 0, 0, 0 }) {}
 
 
 void Pursuit::setLookAhead(double newLKA) {
@@ -67,8 +67,6 @@ bool Pursuit::inLimit(std::vector<double> startPoint, std::vector<double> endPoi
 }
 
 std::vector<double> Pursuit::updatePursuitPoint() {
-
-
     double DisX;
     double DisY;
     double DisR;
@@ -111,9 +109,10 @@ std::vector<double> Pursuit::updatePursuitPoint() {
             //Finds the closest point 
             //the if statement below is to prevent the search algorithm from targeting segments the robot has already traveled.
             std::vector<double> lclosestPoint = closestPoint(lPoint1, solutionsLocal);
-            pursuitPoint[0] = lclosestPoint[0];
-			pursuitPoint[1] = lclosestPoint[1];
-            if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
+            pursuitPoint[0] = lclosestPoint[0];// Set the local X value for pursuitPoint
+            pursuitPoint[1] = lclosestPoint[1];// Set the local Y value for pursuitPoint
+			pursuitPoint[2] = (path[i][2] + path[i+1][2]) / 2; //average max speed of the 2 points
+            if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) { //Test startindex function, still needs a crapton of work lmao
                 startIndex = i;
                 //break;
             }
@@ -121,38 +120,42 @@ std::vector<double> Pursuit::updatePursuitPoint() {
                 startIndex = i + 1;
                 //continue;
             }
-            
+            pursuitPoint[0] += position[0]; //Convert from local to global frame
+            pursuitPoint[1] += position[1]; //Convert from local to global frame
             return pursuitPoint;
-            
-            
-            
+
+
+
         }
         else if (solution1InLimit && !solution2InLimit) { //if solution1 is in limit and solution 2 isn't
-            pursuitPoint = solutionsLocal[0];
-            if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
+            pursuitPoint[0] = solutionsLocal[0][0]; // Set the local X value for pursuitPoint
+			pursuitPoint[1] = solutionsLocal[0][1]; // Set the local Y value for pursuitPoint
+            pursuitPoint[2] = (path[i][2] + path[i + 1][2]) / 2; //average max speed of the 2 points
+            if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) { //Test startindex function, still needs a crapton of work lmao
                 startIndex = i;
             }
             else {
                 startIndex = i + 1;
             }
-            pursuitPoint[0] += position[0];
-            pursuitPoint[1] += position[1];
+            pursuitPoint[0] += position[0]; //Convert from local to global frame
+            pursuitPoint[1] += position[1]; //Convert from local to global frame
             return pursuitPoint;
         }
-		else if (!solution1InLimit && solution2InLimit) { //if solution2 is in limit and solution 1 isn't
-			pursuitPoint = solutionsLocal[1];
-			if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) {
-				startIndex = i;
-			}
-			else {
-				startIndex = i + 1;
-			}
-			pursuitPoint[0] += position[0];
-			pursuitPoint[1] += position[1];
-			return pursuitPoint;
-		}
-		
-			
+        else if (!solution1InLimit && solution2InLimit) { //if solution2 is in limit and solution 1 isn't
+            pursuitPoint[0] = solutionsLocal[1][0]; // Set the local X value for pursuitPoint
+            pursuitPoint[1] = solutionsLocal[1][1]; // Set the local Y value for pursuitPoint
+            if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) { //Test startindex function, still needs a crapton of work lmao
+                startIndex = i;
+            }
+            else {
+                startIndex = i + 1;
+            }
+            pursuitPoint[0] += position[0];//Convert from local to global frame
+            pursuitPoint[1] += position[1];//Convert from local to global frame
+            return pursuitPoint;
+        }
 
+
+    }
     return pursuitPoint;
 }
