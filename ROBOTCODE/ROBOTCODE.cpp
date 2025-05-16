@@ -6,7 +6,60 @@
 #include "odometry.h"
 #include "pathManager.h"
 #include "config.h"
+
+#include <fstream>
+#include <sstream>
+#include <string>
+
+int index = 15;
+bool endDataFound = false;
+void readPathFile(const std::string& filename, std::vector<std::vector<double> >*newPath ) {
+    std::ifstream file(filename);
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string value;
+        std::vector<double> row;
+        index++;
+		if (endDataFound) break; // Stop reading if "endData" is found
+        while (std::getline(ss, value, ',')) {
+
+            if (index > 0) { //skips paths that we've already done
+				static int i = 0; // Initialize i to 0
+				static int initialIndex = index; // Store the initial index, stored statically to prevent skipping more lines than needed
+                if(i < initialIndex){ // like a for loop
+					i++; //increment i
+				    break; // skips the whole line, a continue function wouldn't as it goes through every value between the delimiters.
+                }
+            }
+			if (value == "endData") endDataFound = true; // Stop reading if "endData" is found
+			if (value.empty()) break; // Skip empty values
+			if (value.at(0) == '#' || value.at(0) == '\"' || value.at(0) == '{') break; // Skip comments
+            
+            try {
+                row.push_back(std::stod(value)); // Convert string to double
+            }
+            catch (const std::invalid_argument& e) {
+                std::cerr << "Invalid value: " << value << " in file. Skipping." << std::endl;
+            }
+            if (row.size() == 3) {
+                newPath->push_back(row); // Only add rows with exactly 3 values
+            }
+            else {
+                std::cerr << "Invalid row size: " << row.size() << ". Skipping row." << index << std::endl;
+            }
+        }
+    }
+}
 int main() {
+    std::string filePath = "C:\\Users\\Admin\\Downloads\\path.jerryio.txt"; // Path to your file
+    std::vector<std::vector<double> > pathRow;
+    readPathFile(filePath, &pathRow);
+	std::cout << "Path Row Size: " << pathRow.size() << std::endl;
+    for (int i = 0; i < pathRow.size(); i++) {
+        std::cout << "Row: " << i << " X: " << pathRow[i][0] << " Y: " << pathRow[i][1] << " Max Speed: " << pathRow[i][2] << std::endl;
+    }
     std::vector<std::vector<double> > path = {
         {3,7, 100},
         {4,8, 50},

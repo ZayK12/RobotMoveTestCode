@@ -131,6 +131,7 @@
     <ClCompile Include="pathManager.cpp" />
     <ClCompile Include="purePursuit.cpp" />
     <ClCompile Include="ROBOTCODE.cpp" />
+    <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
