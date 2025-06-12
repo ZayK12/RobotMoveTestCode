@@ -8,6 +8,9 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <fstream>
+#include <sstream>
+#include "config.h"
 
 /// @todo add JerryLum's hot-cold assets and implement an auto changer.
 /// @todo add a parser for text files to grab position.
@@ -56,6 +59,14 @@ public:
      * @return The ram value to a direct pointer to the path vector.
     */
     std::vector<std::vector<double> >** getPathPointer();
+
+	/**
+	 * @author Zayyaan K
+	 * @date 5/15/25
+	 * @brief updates the active path using the jerryLum path file supports multiple paths in one file. Seperated by "endData"
+	 * @return 0
+	*/
+    int updatePathFromFile();
 
     std::vector<std::vector<double> > mainPath;
 private:

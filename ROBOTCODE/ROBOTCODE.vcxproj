@@ -129,14 +129,15 @@
   <ItemGroup>
     <ClCompile Include="odometry.cpp" />
     <ClCompile Include="pathManager.cpp" />
+    <ClCompile Include="PID.cpp" />
     <ClCompile Include="purePursuit.cpp" />
     <ClCompile Include="ROBOTCODE.cpp" />
-    <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="odometry.h" />
     <ClInclude Include="pathManager.h" />
+    <ClInclude Include="PID.h" />
     <ClInclude Include="purePursuit.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

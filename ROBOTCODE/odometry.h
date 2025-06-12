@@ -54,12 +54,28 @@ public:
     void updatePosition(std::vector<double> newPos);
 
     /**
+	* @author Zayyaan K
+    * @date 6/4/25
+	* @brief Updates Orientation and position values w/ changing ram values using a vector
+	* @param newPos new position vector
+    * @param newOrientation new orientation value*/
+    void updatePosition(std::vector<double> newPos, double newOrientation);
+    
+    /**
     * @author Zayyaan K
 	* @date 5/9/25
     * @brief Gets the pointer to the position vector
 	* @return pointer to the position vector */
     std::vector<double>* getPositionPointer();
+
+	/**
+	 * @author Zayyaan K
+	 * @date 6/4/25
+	 * @brief Gets the pointer to the orientation value
+	 * @return pointer to the orientation value */
+    double* getOrientationPointer();
     
+
     std::vector<double> MainPosition;
 private:
     

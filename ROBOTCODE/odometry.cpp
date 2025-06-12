@@ -11,9 +11,8 @@
 odometry::odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack) : MainPosition(initPos), orientation(initOrientation), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition) {}
 odometry::odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack) : MainPosition({ 0,0 }), orientation(0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition){}
 
-std::vector<double>* odometry::getPositionPointer() {
-	return directPositionPtr;
-}
+std::vector<double>* odometry::getPositionPointer() { return directPositionPtr; }
+double* odometry::getOrientationPointer() { return &orientation; }
 void odometry::odometry::updatePosition(double newX, double newY) {
 	MainPosition[0] = newX;
 	MainPosition[1] = newY;
@@ -22,7 +21,11 @@ void odometry::updatePosition(std::vector<double> newPos) {
 	MainPosition[0] = newPos[0];
 	MainPosition[1] = newPos[1];
 }
-
+void odometry::updatePosition(std::vector<double> newPos, double newOrientation) {
+	MainPosition[0] = newPos[0];
+	MainPosition[1] = newPos[1];
+	orientation = overflowCheck(newOrientation);
+}
 double odometry::overflowCheck(double deg) {
 	if (deg == 360) {
 		return 0;
@@ -66,9 +69,9 @@ void odometry::updateDistances() {
 	backInchLast = backInch;
 
 	// update heading aswell
-	double imuHeading = 0; // needs library 
-	double sideHeading = (leftInch - rightInch) / (disL + disR);
-	double headingDelta = subRadians(headingLast, imuHeading);
+	double imuHeading = overflowCheck(0); // needs library 
+	double sideHeading = overflowCheck((leftInch - rightInch) / (disL + disR));
+	double headingDelta = overflowCheck(subRadians(headingLast, imuHeading));
 	headingLast = 0; // @todo needs library
 	orientation = (headingLast + headingDelta) / 2; // Global orientation
 	calculateLocalOffset(backInchDelta, rightInchDelta, headingDelta);

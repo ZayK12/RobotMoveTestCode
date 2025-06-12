@@ -5,8 +5,6 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
-#include <array>
-#include <vector>
 #include <string>
 
 
@@ -131,6 +129,7 @@ std::vector<double> Pursuit::updatePursuitPoint() {
             pursuitPoint[0] = solutionsLocal[0][0]; // Set the local X value for pursuitPoint
 			pursuitPoint[1] = solutionsLocal[0][1]; // Set the local Y value for pursuitPoint
             pursuitPoint[2] = (path[i][2] + path[i + 1][2]) / 2; //average max speed of the 2 points
+			
             if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) { //Test startindex function, still needs a crapton of work lmao
                 startIndex = i;
             }
@@ -144,6 +143,8 @@ std::vector<double> Pursuit::updatePursuitPoint() {
         else if (!solution1InLimit && solution2InLimit) { //if solution2 is in limit and solution 1 isn't
             pursuitPoint[0] = solutionsLocal[1][0]; // Set the local X value for pursuitPoint
             pursuitPoint[1] = solutionsLocal[1][1]; // Set the local Y value for pursuitPoint
+            pursuitPoint[2] = (path[i][2] + path[i + 1][2]) / 2; //average max speed of the 2 points
+            
             if (distance(pursuitPoint, lPoint1) > distance({ 0.0,0.0 }, lPoint1)) { //Test startindex function, still needs a crapton of work lmao
                 startIndex = i;
             }
