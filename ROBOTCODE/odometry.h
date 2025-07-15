@@ -7,6 +7,9 @@ const double pi = 3.14159265359;
 #include <vector>
 #include <string>
 #include <thread>
+#include "main.h"
+#include "api.h"
+#include "pros/adi.hpp"
 /**
  * @todo add encoders within the constructor
  * @todo import the necessary libraries for whatever robotics interfac
@@ -27,7 +30,10 @@ public:
     /// @param distanceLeft distance from left encoder base to tracking center
     /// @param distanceRight distance from right encoder base to tracking center
     /// @param distanceBack  distance from back encoder of the robot to tracking center
-    odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack);
+    /// @param _leftEncoder pointer to left encoder
+    /// @param _rightEncoder pointer to right encoder
+    /// @param backEncoder pointer to back encoder
+    odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::adi::Encoder* _leftEncoder,pros::adi::Encoder* _rightEncoder, pros::adi::Encoder* backEncoder);
 
     /**
      * @author Zayyaan K
@@ -37,7 +43,7 @@ public:
      * @param distanceLeft distance from left encoder base to tracking center
      * @param distanceRight distance from right encoder base to tracking center
      * @param distanceBack  distance from back encoder of the robot to tracking center */
-    odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack);
+    odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack,pros::adi::Encoder* _leftEncoder,pros::adi::Encoder* _rightEncoder, pros::adi::Encoder* backEncoder);
     /**
      * @author Zayyaan K
      * @date 4/28/25
@@ -85,6 +91,9 @@ private:
     const double disR;
     const double disB;
     const double wheelCircum;
+    pros::adi::Encoder* leftEncoder;
+    pros::adi::Encoder* rightEncoder;
+    pros::adi::Encoder* backEncoder;
     
     std::vector<double> localOffset;
     /**

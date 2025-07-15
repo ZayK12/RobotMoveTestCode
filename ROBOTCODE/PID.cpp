@@ -1,15 +1,14 @@
 #include "PID.h"
 
-PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd) :
+PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
 	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd),
 	errorDistance(0.0), errorTurning(0.0), integral(0.0), derivative(0.0), previousError(0.0), turnIntegral(0.0), turnDerivative(0.0), turnPreviousError(0.0),
-	errorSumMargin(1.0), turnErrorMargin(1.0) {}
+	errorSumMargin(1.0), turnErrorMargin(1.0), leftside(_leftMotors), rightside(_rightMotors) {}
 
-PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, double ERM, double TERM, double ESM, int pathDiv, double MPCA) :
+PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, double ERM, double TERM, double ESM, int pathDiv, double MPCA, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
 	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd),
-	errorDistance(0.0), errorTurning(0.0), integral(0.0), derivative(0.0), previousError(0.0), turnIntegral(0.0), turnDerivative(0.0), turnPreviousError(0.0),
-	errorSumMargin(ERM), turnErrorMargin(TERM), errorMargin(ESM), pathDivamt(pathDiv), motorPowerCheckAmt(MPCA) {
-}
+	errorDistance(0.0), errorTurning(0.0), integral(0.0), derivative(0.0), previousError(0.0), turnIntegral(0.0), turnDerivative(0.0), turnPreviousError(0.0), 
+	errorSumMargin(ERM), turnErrorMargin(TERM), errorMargin(ESM), pathDivamt(pathDiv), motorPowerCheckAmt(MPCA), leftside(_leftMotors), rightside(_rightMotors) {}
 bool PID::errorSumUpdate(double inputNumber) {
 	static std::vector<double> numberList(10, 0.0); // List to store the last 10 numbers
 	//errorSum variable stores the sum of the last 10 numbers
@@ -89,6 +88,8 @@ void PID::pidUpdate() {
 
 	}
 	else {
+		leftside->move(powerDistance + powerTurning);
+		rightside->move(powerDistance - powerTurning);
 		std::cout << "Power Distance left: " << powerDistance + powerTurning << "Power Distance Right:" << powerDistance - powerTurning << std::endl;
 	}
 

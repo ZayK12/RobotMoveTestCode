@@ -7,12 +7,14 @@
 #include <vector>
 #include <string>
 
+//Contructors
+odometry::odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::adi::Encoder* _leftEncoder, pros::adi::Encoder* _rightEncoder, pros::adi::Encoder* _backEncoder) : MainPosition(initPos), orientation(initOrientation), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition), leftEncoder(_leftEncoder), rightEncoder(_rightEncoder),backEncoder(_backEncoder) {}
+odometry::odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack,pros::adi::Encoder* _leftEncoder, pros::adi::Encoder* _rightEncoder, pros::adi::Encoder* _backEncoder) : MainPosition({ 0,0 }), orientation(0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition),leftEncoder(_leftEncoder), rightEncoder(_rightEncoder),backEncoder(_backEncoder){}
 
-odometry::odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack) : MainPosition(initPos), orientation(initOrientation), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition) {}
-odometry::odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack) : MainPosition({ 0,0 }), orientation(0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition){}
-
+//Getters
 std::vector<double>* odometry::getPositionPointer() { return directPositionPtr; }
 double* odometry::getOrientationPointer() { return &orientation; }
+//Setters
 void odometry::odometry::updatePosition(double newX, double newY) {
 	MainPosition[0] = newX;
 	MainPosition[1] = newY;
@@ -26,6 +28,7 @@ void odometry::updatePosition(std::vector<double> newPos, double newOrientation)
 	MainPosition[1] = newPos[1];
 	orientation = overflowCheck(newOrientation);
 }
+// Helper Functions
 double odometry::overflowCheck(double deg) {
 	if (deg == 360) {
 		return 0;

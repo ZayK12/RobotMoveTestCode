@@ -4,6 +4,8 @@
 #include <vector>
 #include <list>
 #include <array>
+#include "api.h"
+#include "pros/adi.hpp"
 class PID
 {
 	public:
@@ -22,7 +24,7 @@ class PID
 		* @param   _TKp Turning Proportional constant.			 (_ is to prevent name clashes)
 		* @param   _TKi Turning Integral constant.				 (_ is to prevent name clashes)
 		* @param   _TKd Turning Derivative constant.*/	      // (_ is to prevent name clashes)
-		PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd);
+		PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors);
 		/**
 		* @author  Zayyaan K
 		* @date    5/21/25
@@ -33,7 +35,7 @@ class PID
 		* @param   pathDiv number of divisions for the final path
 		* @param   MPCA motor power check amount (if the motor power is less than this, stop the robot)
 		*/
-		PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, double ERM, double TERM, double ESM, int pathDiv, double MPCA);
+		PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, double ERM, double TERM, double ESM, int pathDiv, double MPCA, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors);
 		/**
 		* @author  Zayyaan K
 		* @date    5/21/25
@@ -45,6 +47,8 @@ class PID
 		std::vector<double>* targetGlobal; // Pointer to the target point	
 		std::vector<double>* currentPosition; //Pointer to the robot's position
 		std::vector<double>* targetLocal; // Pointer to the target point
+		pros::MotorGroup* leftside; // Pointer to the left motors
+  		pros::MotorGroup* rightside; // Pointer to the right motors
 		double* currentHeading; // Pointer to the robot's heading
 		double DKp, DKi, DKd; // Forward PID constants
 		double TKp, TKi, TKd; // Turning PID constants
@@ -65,7 +69,7 @@ class PID
 		std::vector<double> cartesianToClock(const std::vector<double>& localVector);
 
 		//Gets the angle between two points in degrees
-		double deltaDegrees(double a, double b);
+		double deltaDegrees(double a, double b); 
 
 
 
