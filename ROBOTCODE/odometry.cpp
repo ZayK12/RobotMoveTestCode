@@ -116,7 +116,8 @@ void odometry::updateDistances(){
 	double imuHeading = (leftIMU->get_heading() + rightIMU->get_heading()) / 2;
 	double sideHeading = orientation + overflowCheck((leftInchDelta + rightInchDelta) / (disL + disR));
 	
-	orientation = sideHeading + imuHeading / 2;
+	//orientation = sideHeading + imuHeading / 2;
+	orientation = imuHeading;
 	double orientationDelta = orientation - orientationLast;
 	orientationLast = orientation;
 
