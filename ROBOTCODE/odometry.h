@@ -10,6 +10,7 @@ const double pi = 3.14159265359;
 #include "main.h"
 #include "api.h"
 #include "pros/adi.hpp"
+#include "pros/imu.hpp"
 /**
  * @todo add encoders within the constructor
  * @todo import the necessary libraries for whatever robotics interfac
@@ -33,7 +34,8 @@ public:
     /// @param _leftEncoder pointer to left encoder
     /// @param _rightEncoder pointer to right encoder
     /// @param backEncoder pointer to back encoder
-    odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::adi::Encoder* _leftEncoder,pros::adi::Encoder* _rightEncoder, pros::adi::Encoder* backEncoder);
+    odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::Rotation* _leftEncoder,pros::Rotation* _rightEncoder, pros::Rotation* backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU);
+
 
     /**
      * @author Zayyaan K
@@ -43,7 +45,9 @@ public:
      * @param distanceLeft distance from left encoder base to tracking center
      * @param distanceRight distance from right encoder base to tracking center
      * @param distanceBack  distance from back encoder of the robot to tracking center */
-    odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack,pros::adi::Encoder* _leftEncoder,pros::adi::Encoder* _rightEncoder, pros::adi::Encoder* backEncoder);
+    odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack,pros::Rotation* _leftEncoder,pros::Rotation* _rightEncoder, pros::Rotation* backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU);
+    
+   
     /**
      * @author Zayyaan K
      * @date 4/28/25
@@ -83,6 +87,18 @@ public:
     
 
     std::vector<double> MainPosition;
+    /**
+     * @brief updates encoder values
+     * @note also automatically calls the calculate local offset, may need to do some c++ trickery */
+    void updateDistances();
+
+    /**
+     * @note this is the old version of the update distances retained in case of the patch not working properly
+     * @author Zayyaan K
+     * @date 8/20/25
+     * @brief old version of update distances
+     */
+    void updateDistancesOld();
 private:
     
     std::vector<double>* directPositionPtr;
@@ -91,9 +107,12 @@ private:
     const double disR;
     const double disB;
     const double wheelCircum;
-    pros::adi::Encoder* leftEncoder;
-    pros::adi::Encoder* rightEncoder;
-    pros::adi::Encoder* backEncoder;
+    pros::Rotation* leftEncoder;
+    pros::Rotation* rightEncoder;
+    pros::Rotation* backEncoder;
+    pros::v5::IMU* leftIMU; // IMU for left side of robot, can be center IMU if only one is present
+    pros::v5::IMU* rightIMU;
+    const double TOLERANCE = 1e-3; //Tolerance for floating point comparisons
     
     std::vector<double> localOffset;
     /**
@@ -115,10 +134,11 @@ private:
      * @param radius radius from polar set
      * @param theta theta from polar set*/
     void polarToCartesian(double& radius, double& theta);
-    /**
-     * @brief updates encoder values
-     * @note also automatically calls the calculate local offset, may need to do some c++ trickery */
-    void updateDistances();
+    
+    
+
+
+
     /**
      * @brief updates the changes in X and Y values*/
     void calculateLocalOffset(double backInchDelta_, double rightInchDelta_, double headingDelta_);
