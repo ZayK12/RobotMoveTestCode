@@ -1,6 +1,5 @@
 #ifndef odometry_H
 #define odometry_H
-const double pi = 3.14159265359;
 #include <cmath>
 #include <iostream>
 #include <array>
@@ -103,6 +102,7 @@ private:
     
     std::vector<double>* directPositionPtr;
     double orientation;
+    double orientationDeg;
     const double disL;
     const double disR;
     const double disB;
