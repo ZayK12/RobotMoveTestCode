@@ -40,57 +40,77 @@ double PID::deltaDegrees(double a, double b) {
 	double delta = fmod(b - a + 180.0, 360.0) - 180.0;
 	return delta;
 }
-void PID::pidUpdate() {
+void PID::pidUpdate(){
 	// Calculate local target vector (relative to robot)
 	std::vector<double> targetLocal = {
 		(*targetGlobal)[0] - (*currentPosition)[0],
 		(*targetGlobal)[1] - (*currentPosition)[1]
 	};
 
-	// Convert to polar (distance, angle)
+	double theta = (*currentHeading) * M_PI / 180;
+	double localizedX = targetLocal[0] * cos(theta) - targetLocal[1] * sin(theta);
+	double localizedY = -targetLocal[0] * sin(theta) + targetLocal[1] * cos(theta);
+
+
+
+
+	/*
+	// Takes the local target and converts it to clock coordinates
 	std::vector<double> clockTarget = cartesianToClock(targetLocal);
 	errorDistance = clockTarget[0];
 	errorTurning = deltaDegrees(*currentHeading, clockTarget[1]);
+	*/
 
 	// If target is behind, reverse direction
-	if (fabs(errorDistance) > 90) {
+	/* This function prbobaly works, I just don't like it, so I will comment it out for now.
+	if (fabs(errorTurning) > 90) {
 		errorDistance = -errorDistance;
 		errorTurning = deltaDegrees(180, errorTurning);
 	}
-
-	// Stop if within error margin
+	*/
+	// If robot is close enough to end point, stop
 	if (fabs(errorDistance) < errorMargin) {
 		errorDistance = 0;
-		turnIntegral = 0;
+		integral = 0;
 	}
-
-	// PID calculations for distance
+	//Updates ID variables
 	integral += errorDistance;
-	double derivative = errorDistance - previousError;
+	double deriviative = errorDistance - previousError;
 	previousError = errorDistance;
-
-	// PID calculations for turning
+	//Updates the turning ID variables
 	turnIntegral += errorTurning;
 	double turnDerivative = errorTurning - turnPreviousError;
 	turnPreviousError = errorTurning;
 
-	// Speed caps
+	// Calculates the power amounts for distance and turning
 	double maxSpeed = (*targetGlobal)[2];
-	double powerDistance = DKp * errorDistance + DKi * integral + DKd * derivative;
-	if (powerDistance > maxSpeed) powerDistance = maxSpeed;
-	else if (powerDistance < -maxSpeed) powerDistance = -maxSpeed;
+	
+	//double powerDistance = DKp * errorDistance + DKi * integral + DKd * derivative; // Pid formula
+	double powerDistance = DKp * localizedX + DKi * integral + DKd * derivative; // Pid formula
+	if (powerDistance > maxSpeed) { // Speed cap
+		powerDistance = maxSpeed;
+	}
+	else if (powerDistance < -maxSpeed) {
+		powerDistance = -maxSpeed;
+	}
+	/// @note needs strafing constants.
+	//double powerStrafe = DKp * localizedY + DKi * integral + DKd * derivative; // Pid formula
 
-	double powerTurning = TKp * errorTurning + TKi * turnIntegral + TKd * turnDerivative;
-	if (powerTurning > maxTurnSpeed) powerTurning = maxTurnSpeed;
-	else if (powerTurning < -maxTurnSpeed) powerTurning = -maxTurnSpeed;
-
-	// Output
+	double powerTurning = TKp * errorTurning + TKi * turnIntegral + TKd * turnDerivative; // Pid formula
+	if (powerTurning > maxTurnSpeed) { // Speed cap
+		powerTurning = maxTurnSpeed;
+	}
+	else if (powerTurning < -maxTurnSpeed) {
+		powerTurning = -maxTurnSpeed;
+	}
 	if (errorSumUpdate(errorDistance)) {
 		std::cout << "Below Margin" << std::endl;
-	} else {
+	}
+	else {
 		leftside->move(powerDistance + powerTurning);
 		rightside->move(powerDistance - powerTurning);
-		std::cout << "Power Distance left: " << powerDistance + powerTurning
-			  << " Power Distance Right: " << powerDistance - powerTurning << std::endl;
+		std::cout << "Power Distance left: " << powerDistance + powerTurning << "Power Distance Right:" << powerDistance - powerTurning << std::endl;
 	}
+
+
 }
