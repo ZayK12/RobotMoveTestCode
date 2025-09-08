@@ -1,11 +1,11 @@
 #include "PID.h"
 
-PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
+PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double& _maxDSpeed, double& _maxTSpeed, double& _DKp, double& _DKi, double& _DKd, double& _TKp, double& _TKi, double& _TKd, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
 	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd),
 	errorDistance(0.0), errorTurning(0.0), integral(0.0), derivative(0.0), previousError(0.0), turnIntegral(0.0), turnDerivative(0.0), turnPreviousError(0.0),
 	errorSumMargin(1.0), turnErrorMargin(1.0), leftside(_leftMotors), rightside(_rightMotors) {}
 
-PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double _maxDSpeed, double _maxTSpeed, double _DKp, double _DKi, double _DKd, double _TKp, double _TKi, double _TKd, double ERM, double TERM, double ESM, int pathDiv, double MPCA, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
+PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double& _maxDSpeed, double& _maxTSpeed, double& _DKp, double& _DKi, double& _DKd, double& _TKp, double& _TKi, double& _TKd, double& ERM, double& TERM, double& ESM, int& pathDiv, double& MPCA, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
 	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd),
 	errorDistance(0.0), errorTurning(0.0), integral(0.0), derivative(0.0), previousError(0.0), turnIntegral(0.0), turnDerivative(0.0), turnPreviousError(0.0), 
 	errorSumMargin(ERM), turnErrorMargin(TERM), errorMargin(ESM), pathDivamt(pathDiv), motorPowerCheckAmt(MPCA), leftside(_leftMotors), rightside(_rightMotors) {}
@@ -41,57 +41,56 @@ double PID::deltaDegrees(double a, double b) {
 	return delta;
 }
 void PID::pidUpdate() {
-	
-	std::vector<double> targetLocal = { (*targetGlobal)[0] - (*currentPosition)[0], (*targetGlobal)[1] - (*currentPosition)[1] }; // Gets target within local coordinate scope
-	// Takes the local target and converts it to clock coordinates
+	// Calculate local target vector (relative to robot)
+	std::vector<double> targetLocal = {
+		(*targetGlobal)[0] - (*currentPosition)[0],
+		(*targetGlobal)[1] - (*currentPosition)[1]
+	};
+
+	// Convert to polar (distance, angle)
 	std::vector<double> clockTarget = cartesianToClock(targetLocal);
-	// Sets the error (proportinate) amounts
 	errorDistance = clockTarget[0];
 	errorTurning = deltaDegrees(*currentHeading, clockTarget[1]);
-	//Will use back of robot to move if it is closer
+
+	// If target is behind, reverse direction
 	if (fabs(errorDistance) > 90) {
 		errorDistance = -errorDistance;
 		errorTurning = deltaDegrees(180, errorTurning);
 	}
-	// If robot is close enough to end point, stop
+
+	// Stop if within error margin
 	if (fabs(errorDistance) < errorMargin) {
 		errorDistance = 0;
 		turnIntegral = 0;
 	}
-	//Updates ID variables
+
+	// PID calculations for distance
 	integral += errorDistance;
-	double deriviative = errorDistance - previousError;
+	double derivative = errorDistance - previousError;
 	previousError = errorDistance;
-	//Updates the turning ID variables
+
+	// PID calculations for turning
 	turnIntegral += errorTurning;
 	double turnDerivative = errorTurning - turnPreviousError;
 	turnPreviousError = errorTurning;
 
-	// Calculates the power amounts for distance and turning
+	// Speed caps
 	double maxSpeed = (*targetGlobal)[2];
 	double powerDistance = DKp * errorDistance + DKi * integral + DKd * derivative;
-	if (powerDistance > maxSpeed) {
-		powerDistance = maxSpeed;
-	}
-	else if (powerDistance < -maxSpeed) {
-		powerDistance = -maxSpeed;
-	}
+	if (powerDistance > maxSpeed) powerDistance = maxSpeed;
+	else if (powerDistance < -maxSpeed) powerDistance = -maxSpeed;
+
 	double powerTurning = TKp * errorTurning + TKi * turnIntegral + TKd * turnDerivative;
-	if (powerTurning > maxTurnSpeed) {
-		powerTurning = maxTurnSpeed;
-	}
-	else if (powerTurning < -maxTurnSpeed) {
-		powerTurning = -maxTurnSpeed;
-	}
+	if (powerTurning > maxTurnSpeed) powerTurning = maxTurnSpeed;
+	else if (powerTurning < -maxTurnSpeed) powerTurning = -maxTurnSpeed;
+
+	// Output
 	if (errorSumUpdate(errorDistance)) {
 		std::cout << "Below Margin" << std::endl;
-
-	}
-	else {
+	} else {
 		leftside->move(powerDistance + powerTurning);
 		rightside->move(powerDistance - powerTurning);
-		std::cout << "Power Distance left: " << powerDistance + powerTurning << "Power Distance Right:" << powerDistance - powerTurning << std::endl;
+		std::cout << "Power Distance left: " << powerDistance + powerTurning
+			  << " Power Distance Right: " << powerDistance - powerTurning << std::endl;
 	}
-
-
 }
