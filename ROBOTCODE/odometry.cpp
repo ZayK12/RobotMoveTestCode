@@ -95,26 +95,27 @@ void odometry::updateDistancesOld() {
 	calculateLocalOffset(backInchDelta, rightInchDelta, orientationDelta);
 }
 void odometry::updateDistances(){
-	double static leftInchLast=0, rightInchLast=0, backInchLast=0, orientationLast = 0;
+	double static rightInchLast=0, backInchLast=0, orientationLast = 0;
+	//double static leftInchLast=0;
 
-	double leftDeg = leftEncoder->get_position() * 100; // The *100 is because the rotation sensor returns centidegrees
-	double rightDeg = rightEncoder->get_position() * 100;
+	//double leftDeg = leftEncoder->get_position() * 100; 
+	double rightDeg = rightEncoder->get_position() * 100; // The *100 is because the rotation sensor returns centidegrees
 	double backDeg = backEncoder->get_position() * 100; 
 
-	double leftInch = leftDeg / 360 * wheelCircum;
+	//double leftInch = leftDeg / 360 * wheelCircum;
 	double rightInch = rightDeg / 360 * wheelCircum;
 	double backInch = backDeg / 360 * wheelCircum;
 
-	double leftInchDelta = leftInch - leftInchLast;
+	//double leftInchDelta = leftInch - leftInchLast;
 	double rightInchDelta = rightInch - rightInchLast;
 	double backInchDelta = backInch - backInchLast;
 
-	leftInchLast = leftInch;
+	//leftInchLast = leftInch;
 	rightInchLast = rightInch;
 	backInchLast = backInch;
 	
 	double imuHeading = (leftIMU->get_heading() + rightIMU->get_heading()) / 2;
-	double sideHeading = orientation + overflowCheck((leftInchDelta + rightInchDelta) / (disL + disR));
+	//double sideHeading = orientation + overflowCheck((leftInchDelta + rightInchDelta) / (disL + disR));
 	
 	//orientation = sideHeading + imuHeading / 2;
 	orientation = overflowCheck(imuHeading) * M_PI / 180.0; // Global orientation in deg
