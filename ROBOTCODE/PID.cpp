@@ -1,14 +1,14 @@
 #include "PID.h"
 
-PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double& _maxDSpeed, double& _maxTSpeed, double& _DKp, double& _DKi, double& _DKd, double& _TKp, double& _TKi, double& _TKd, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
-	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd),
+PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double& _maxDSpeed, double& _maxTSpeed, double& _DKp, double& _DKi, double& _DKd, double& _TKp, double& _TKi, double& _TKd,double& _SKp, double& _SKi, double& _SKd, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
+	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd), SKp(_SKp), SKi(_SKi), SKd(_SKd),
 	errorDistance(0.0), errorTurning(0.0), integral(0.0), derivative(0.0), previousError(0.0), turnIntegral(0.0), turnDerivative(0.0), turnPreviousError(0.0),
 	errorSumMargin(1.0), turnErrorMargin(1.0), leftside(_leftMotors), rightside(_rightMotors) {}
 
-PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double& _maxDSpeed, double& _maxTSpeed, double& _DKp, double& _DKi, double& _DKd, double& _TKp, double& _TKi, double& _TKd, double& ERM, double& TERM, double& ESM, int& pathDiv, double& MPCA, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
-	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd),
+PID::PID(std::vector<double>* Point, std::vector<double>* position, double* heading, double& _maxDSpeed, double& _maxTSpeed, double& _DKp, double& _DKi, double& _DKd, double& _TKp, double& _TKi, double& _TKd, double& _SKp, double& _SKi, double& _SKd, double& ERM, double& TERM, double& SERM, double& ESM, int& pathDiv, double& MPCA, pros::MotorGroup* _leftMotors, pros::MotorGroup* _rightMotors) :
+	targetGlobal(Point), currentPosition(position), currentHeading(heading), maxDSpeed(_maxDSpeed), maxTurnSpeed(_maxTSpeed), DKp(_DKp), DKi(_DKi), DKd(_DKd), TKp(_TKp), TKi(_TKi), TKd(_TKd), SKp(_SKp), SKi(_SKi), SKd(_SKd),
 	errorDistance(0.0), errorTurning(0.0), integral(0.0), derivative(0.0), previousError(0.0), turnIntegral(0.0), turnDerivative(0.0), turnPreviousError(0.0), 
-	errorSumMargin(ERM), turnErrorMargin(TERM), errorMargin(ESM), pathDivamt(pathDiv), motorPowerCheckAmt(MPCA), leftside(_leftMotors), rightside(_rightMotors) {}
+	errorSumMargin(ERM), turnErrorMargin(TERM), strafeErrorMargin(SERM), errorMargin(ESM), pathDivamt(pathDiv), motorPowerCheckAmt(MPCA), leftside(_leftMotors), rightside(_rightMotors) {}
 bool PID::errorSumUpdate(double inputNumber) {
 	static std::vector<double> numberList(10, 0.0); // List to store the last 10 numbers
 	//errorSum variable stores the sum of the last 10 numbers
@@ -40,12 +40,15 @@ double PID::deltaDegrees(double a, double b) {
 	double delta = fmod(b - a + 180.0, 360.0) - 180.0;
 	return delta;
 }
+
+
 void PID::pidUpdate(){
 	// Calculate local target vector (relative to robot)
 	std::vector<double> targetLocal = {
 		(*targetGlobal)[0] - (*currentPosition)[0],
 		(*targetGlobal)[1] - (*currentPosition)[1]
 	};
+	double targetHeading = (*targetGlobal)[3];
 
 	double theta = (*currentHeading) * M_PI / 180;
 	double localizedX = targetLocal[0] * cos(theta) - targetLocal[1] * sin(theta);
@@ -103,7 +106,8 @@ void PID::pidUpdate(){
 	else if (powerTurning < -maxTurnSpeed) {
 		powerTurning = -maxTurnSpeed;
 	}
-	if (errorSumUpdate(errorDistance)) {
+	double distanceFromPoint = sqrt(pow(targetLocal[0], 2) + pow(targetLocal[1], 2));
+	if (errorSumUpdate(distanceFromPoint)) {
 		std::cout << "Below Margin" << std::endl;
 	}
 	else {
