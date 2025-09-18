@@ -11,9 +11,9 @@
 
 //Contructor
 //2 IMUs
-odometry::odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::Rotation* _leftEncoder, pros::Rotation* _rightEncoder, pros::Rotation* _backEncoder,pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU) : MainPosition(initPos), orientation(initOrientation * M_PI / 180.0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition), leftEncoder(_leftEncoder), rightEncoder(_rightEncoder),backEncoder(_backEncoder), leftIMU(_leftIMU), rightIMU(_rightIMU) {}
+odometry::odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::Rotation* _rightEncoder, pros::Rotation* _backEncoder,pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU) : MainPosition(initPos), orientation(initOrientation * M_PI / 180.0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition), rightEncoder(_rightEncoder),backEncoder(_backEncoder), leftIMU(_leftIMU), rightIMU(_rightIMU) {}
 
-odometry::odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack,pros::Rotation* _leftEncoder, pros::Rotation* _rightEncoder, pros::Rotation* _backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU) : MainPosition({ 0.0,0.0 }), orientation(0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition),leftEncoder(_leftEncoder), rightEncoder(_rightEncoder),backEncoder(_backEncoder), leftIMU(_leftIMU), rightIMU(_rightIMU){}
+odometry::odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::Rotation* _rightEncoder, pros::Rotation* _backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU) : MainPosition({ 0.0,0.0 }), orientation(0), wheelCircum(wheelC), disL(distanceLeft), disR(distanceRight), disB(distanceBack), directPositionPtr(&MainPosition), rightEncoder(_rightEncoder),backEncoder(_backEncoder), leftIMU(_leftIMU), rightIMU(_rightIMU){}
 
 
 
@@ -70,16 +70,16 @@ void odometry::updateDistancesOld() {
 	std::cout << "DEVELOPMENT FUNCTION IN USE: ODOMETRY::UPDATEDISTANCESOLD";
 	double static leftInchLast=0, rightInchLast=0, backInchLast=0, headingLast = 0;
 
-	double leftDeg = leftEncoder->get_position() * 100; // The *100 is because the rotation sensor returns centidegrees
+	//double leftDeg = leftEncoder->get_position() * 100; // The *100 is because the rotation sensor returns centidegrees
 	double rightDeg = rightEncoder->get_position() * 100;
 	double backDeg = backEncoder->get_position() * 100; 
-	double leftInch = leftDeg / 360 * wheelCircum;
+	//double leftInch = leftDeg / 360 * wheelCircum;
 	double rightInch = rightDeg / 360 * wheelCircum;
 	double backInch = backDeg / 360 * wheelCircum;
-	double leftInchDelta = leftInch - leftInchLast;
+	//double leftInchDelta = leftInch - leftInchLast;
 	double rightInchDelta = rightInch - rightInchLast;
 	double backInchDelta = backInch - backInchLast;
-	leftInchLast = leftInch;
+	//leftInchLast = leftInch;
 	rightInchLast = rightInch;
 	backInchLast = backInch;
 
@@ -87,12 +87,12 @@ void odometry::updateDistancesOld() {
 	/// @note Currently this only uses the IMU reading to calculate the heading.
 	/// @todo Implement a method to calculate heading using the side encoders as well.
 	double imuHeading = (leftIMU->get_heading() + rightIMU->get_heading()) / 2;
-	double sideHeading = overflowCheck((leftInch - rightInch) / (disL + disR));
+	//double sideHeading = overflowCheck((leftInch - rightInch) / (disL + disR));
 
-	double orientationDelta = (rightInchDelta - leftInchDelta)/ (disL + disR); // Difference since last update
+	//double orientationDelta = (rightInchDelta - leftInchDelta)/ (disL + disR); // Difference since last update
 	//orientation += orientationDelta; // Global orientation
 	orientation = imuHeading * M_PI / 180.0; // Global orientation in radians
-	calculateLocalOffset(backInchDelta, rightInchDelta, orientationDelta);
+	//calculateLocalOffset(backInchDelta, rightInchDelta, orientationDelta);
 }
 void odometry::updateDistances(){
 	double static rightInchLast=0, backInchLast=0, orientationLast = 0;
