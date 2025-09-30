@@ -30,10 +30,9 @@ public:
     /// @param distanceLeft distance from left encoder base to tracking center
     /// @param distanceRight distance from right encoder base to tracking center
     /// @param distanceBack  distance from back encoder of the robot to tracking center
-    /// @param _leftEncoder pointer to left encoder
     /// @param _rightEncoder pointer to right encoder
     /// @param backEncoder pointer to back encoder
-    odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::Rotation* _leftEncoder,pros::Rotation* _rightEncoder, pros::Rotation* backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU);
+    odometry(std::vector<double> initPos, double initOrientation, double wheelC, double distanceLeft, double distanceRight, double distanceBack, pros::Rotation* _rightEncoder, pros::Rotation* backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU);
 
 
     /**
@@ -44,7 +43,7 @@ public:
      * @param distanceLeft distance from left encoder base to tracking center
      * @param distanceRight distance from right encoder base to tracking center
      * @param distanceBack  distance from back encoder of the robot to tracking center */
-    odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack,pros::Rotation* _leftEncoder,pros::Rotation* _rightEncoder, pros::Rotation* backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU);
+    odometry(double wheelC, double distanceLeft, double distanceRight, double distanceBack,pros::Rotation* _rightEncoder, pros::Rotation* backEncoder, pros::v5::IMU* _leftIMU, pros::v5::IMU* _rightIMU);
     
    
     /**
@@ -81,7 +80,7 @@ public:
 	 * @author Zayyaan K
 	 * @date 6/4/25
 	 * @brief Gets the pointer to the orientation value
-	 * @return pointer to the orientation value */
+	 * @return pointer to the orientation value (radians)*/
     double* getOrientationPointer();
     
 
@@ -101,16 +100,14 @@ public:
 private:
     
     std::vector<double>* directPositionPtr;
-    double orientation;
-    double orientationDeg;
+    double orientation; 
     const double disL;
     const double disR;
     const double disB;
     const double wheelCircum;
-    pros::Rotation* leftEncoder;
     pros::Rotation* rightEncoder;
     pros::Rotation* backEncoder;
-    pros::v5::IMU* leftIMU; // IMU for left side of robot, can be center IMU if only one is present
+    pros::v5::IMU* leftIMU;
     pros::v5::IMU* rightIMU;
     const double TOLERANCE = 1e-3; //Tolerance for floating point comparisons
     
