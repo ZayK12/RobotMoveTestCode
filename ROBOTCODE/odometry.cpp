@@ -19,7 +19,7 @@ odometry::odometry(double wheelC, double distanceLeft, double distanceRight, dou
 
 //Getters
 std::vector<double>* odometry::getPositionPointer() { return directPositionPtr; }
-double* odometry::getOrientationPointer() { return &orientationDeg; }
+double* odometry::getOrientationPointer() { return &orientation; }
 //Setters
 void odometry::updatePosition(double newX, double newY) {
 	MainPosition[0] = newX;
@@ -114,13 +114,13 @@ void odometry::updateDistances(){
 	rightInchLast = rightInch;
 	backInchLast = backInch;
 	
-	double imuHeading = (leftIMU->get_heading() + rightIMU->get_heading()) / 2;
+	double imuHeading = (leftIMU->get_heading() + rightIMU->get_heading()) / 2; // IMU heading in degrees (no overflow check)
 	//double sideHeading = orientation + overflowCheck((leftInchDelta + rightInchDelta) / (disL + disR));
 	
 	//orientation = sideHeading + imuHeading / 2;
-	orientation = overflowCheck(imuHeading) * M_PI / 180.0; // Global orientation in deg
-	double orientationDelta = orientation - orientationLast;
-	orientationLast = orientation;
+	orientation = overflowCheck(imuHeading) * M_PI / 180.0; // IMU heading in radians
+	double orientationDelta = orientation - orientationLast; //Difference of rotation in radians
+	orientationLast = orientation; // Previous orientation in radians
 
 	calculateLocalOffset(backInchDelta, rightInchDelta, orientationDelta);
 }
@@ -141,6 +141,5 @@ void odometry::rotateToGlobalFrame() {
 	polarToCartesian(localOffset[0], localOffset[1]);
 	MainPosition[0] += localOffset[0]; //global pos
 	MainPosition[1] += localOffset[1]; //global pos
-	orientationDeg = orientation * 180.0 / M_PI; // Convert to degrees
 	//std::cout << "X: " << MainPosition[0] << " Y: " << MainPosition[1] << " Orientation: " << orientation << std::endl;
 }
