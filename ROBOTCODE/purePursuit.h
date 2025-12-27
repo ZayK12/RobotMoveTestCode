@@ -35,6 +35,7 @@ public:
     void setLookAhead(double newLKA);
 
     std::vector<double> pursuitPoint = { 0.0, 0.0 }; // the set pursuit point, initialized at 0,0 to prevent errors
+    int startIndex = 0;
 	
 private:
     double lookAhead;
