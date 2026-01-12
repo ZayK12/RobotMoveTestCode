@@ -14,6 +14,8 @@
 
 /// @todo add JerryLum's hot-cold assets and implement an auto changer.
 /// @todo add a parser for text files to grab position.
+
+
 class pathManager {
 public:
 
@@ -23,7 +25,7 @@ public:
      * @brief path manager constructor w/ an already active path
      * @param initPath the initial path you want it set to
     */
-    pathManager(std::vector<std::vector<double> >& initPath);
+    pathManager(std::vector<std::vector<float> >& initPath);
 
     /**
      * @author Zayyaan K
@@ -49,7 +51,7 @@ public:
      * @details version 1, had 2 inputs, but since one input always intended to be the direct pointer to the active path, I just changed it to be the class' direct pointer.
      * @param newPath The path you want set to active path.
     */
-    int setActivePath(std::vector<std::vector<double> >& newPath);
+    int setActivePath(std::vector<std::vector<float> >& newPath);
 
     /**
      * @author Zayyaan K
@@ -58,7 +60,7 @@ public:
      * @brief Assign all path pointers using this function.
      * @return The ram value to a direct pointer to the path vector.
     */
-    std::vector<std::vector<double> >** getPathPointer();
+    std::vector<std::vector<float> >** getPathPointer();
 
 	/**
 	 * @author Zayyaan K
@@ -68,9 +70,9 @@ public:
 	*/
     int updatePathFromFile();
 
-    std::vector<std::vector<double> > mainPath;
+    std::vector<std::vector<float> > mainPath;
 private:
-    std::vector<std::vector<double> >* pathPointer; //Direct Pointer to the mainPath
+    std::vector<std::vector<float> >* pathPointer; //Direct Pointer to the mainPath
 
 };
 
