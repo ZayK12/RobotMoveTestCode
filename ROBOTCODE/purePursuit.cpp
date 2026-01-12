@@ -11,43 +11,46 @@
 
 
 
-Pursuit::Pursuit(std::vector<std::vector<double>>** p, std::vector<double>* pos, double LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA), pursuitPoint({ 0, 0, 0 ,0, 0}) {}
+Pursuit::Pursuit(std::vector<std::vector<float>>** p, std::vector<float>* pos, float LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA), pursuitPoint({ 0, 0, 0 ,0, 0}) {}
 
 
-void Pursuit::setLookAhead(double newLKA) {
+void Pursuit::setLookAhead(float newLKA) {
     lookAhead = newLKA;
 }
-double Pursuit::sign(double number) const {
+float Pursuit::sign(float number) const {
     if (number == 0) {
         return 1;
     }
-    return number / fabs(number);
+    return number / fabsf(number);
 }
-double Pursuit::distance(std::vector<double> point0, std::vector<double> point1) const {
-    return sqrt(pow(point0[0] - point1[0], 2) + pow(point0[1] - point1[1], 2));
+float Pursuit::distance(std::vector<float> point0, std::vector<float> point1) const {
+    return sqrtf((point0[0] - point1[0]) * (point0[0] - point1[0]) + (point0[1] - point1[1]) * (point0[1] - point1[1]));
 }
-
-
-std::vector<double> Pursuit::closestPoint(std::vector<double> point, std::vector<std::vector<double>> pointSet) const {
-    if (distance(point, pointSet[0]) > distance(point, pointSet[1])) {
+float Pursuit::distanceSquared(std::vector<float> point0, std::vector<float> point1) const {
+    return ((point0[0] - point1[0]) * (point0[0] - point1[0]) + (point0[1] - point1[1]) * (point0[1] - point1[1]));
+}
+float Pursuit::distanceSquared(float pointX, float pointY, std::vector<float> point1) const {
+    return ((pointX - point1[0]) * (pointX - point1[0]) + (pointY - point1[1]) * (pointY - point1[1]));
+}
+float Pursuit::distanceSquared(float pointX, float pointY, float point1X, float point1Y) const {
+    return ((pointX - point1X) * (pointX - point1X) + (pointY - point1Y) * (pointY - point1Y));
+}
+std::vector<float> Pursuit::closestPoint(float pointX, float pointY, std::vector<std::vector<float>> pointSet) const {
+    if (distanceSquared(pointX, pointY, pointSet[0]) > distanceSquared(pointX, pointY, pointSet[1])) {
         return pointSet[1];
     }
     return pointSet[0];
 }
 
-double Pursuit::findDiscrim(std::vector<double> point0, std::vector<double> point1, double dis, double& determen) {
+float Pursuit::findDiscrim(float point0X, float point0Y, float point1X, float point1Y, float dis, float& determen) {
 
-    double* determ = &determen;
+    float* determ = &determen;
 
-    *determ = point0[0] * point1[1] - point0[1] * point1[0]; //x1*y2 - x2*y1
+    *determ = point0X * point1Y - point0Y * point1X; //x1*y2 - x2*y1
 
-    double Discrim = pow(lookAhead, 2) * pow(dis, 2) - pow(*determ, 2); //lookAhead^2 * dis^2 - determ^2
+    float Discrim = (lookAhead*lookAhead) * (dis * dis) - (*determ * *determ); //lookAhead^2 * dis^2 - determ^2
     if (Discrim < TOLERANCE && Discrim > -TOLERANCE) {
         Discrim = 0.0; //Corrects for floating point errors
-    }
-    // Clamp negative discriminants to zero to prevent NaN from sqrt
-    if (Discrim < 0.0) {
-        Discrim = 0.0;
     }
     if (config::debugPursuit) {
         printf("\n Dis: %.3f, Det: %.3f\n", Discrim, *determ);
@@ -56,47 +59,40 @@ double Pursuit::findDiscrim(std::vector<double> point0, std::vector<double> poin
     return Discrim;
 }
 
-std::vector<std::vector<double>> Pursuit::hitPoints(std::vector<double> p1, std::vector<double> p2, double discrim, double determen, double distanceX, double distanceY, double distance) {
-
-    std::vector<double> intsec1 = {//Positive Variation
+std::vector<std::vector<float>> Pursuit::hitPoints(float discrim, float determen, float distanceX, float distanceY, float distance) {
+    float sqrtDiscrim = sqrt(discrim);
+    float distanceSquared = distance*distance;
+    std::vector<float> intsec1 = {//Positive Variation
         //X positive value
-        (determen * distanceY + sign(distanceY) * distanceX * sqrt(discrim)) / pow(distance, 2),
+        (determen * distanceY + sign(distanceY) * distanceX * sqrtDiscrim) / distanceSquared,
         //Y positive value
-        (-determen * distanceX + fabs(distanceY) * sqrt(discrim)) / pow(distance,2) };
-    std::vector<double> intsec2 = {//Negative Variation
+        (-determen * distanceX + fabsf(distanceY) * sqrtDiscrim) / distanceSquared };
+    std::vector<float> intsec2 = {//Negative Variation
         //X negative value
-        (determen * distanceY - sign(distanceY) * distanceX * sqrt(discrim)) / pow(distance, 2),
+        (determen * distanceY - sign(distanceY) * distanceX * sqrtDiscrim) / distanceSquared,
         //Y negative value
-        (-determen * distanceX - fabs(distanceY) * sqrt(discrim)) / pow(distance,2) };
-    std::vector <std::vector<double>> intsecs = { intsec1, intsec2 };
-    if (config::debugPursuit) {
-        printf("Intersection Points: \nPair 1: (%.3f,%.3f) \nPair2(%.3f,%.3f)\n", intsec1[0],intsec1[1],intsec2[0],intsec2[1]);
-        /*
-        std::cout << "Intersection Points: \n";
-        std::cout << "X1: " << intsec1[0] << " Y1: " << intsec1[1] << std::endl;
-        std::cout << "X2: " << intsec2[0] << " Y2: " << intsec2[1] << std::endl;
-        */
-    }
+        (-determen * distanceX - fabsf(distanceY) * sqrtDiscrim) / distanceSquared };
+    printf("\n Sol 1: X:%.3f, Y:%.3f \n Sol 2: X:%.3f, Y:%.3f", intsec1[0], intsec1[1], intsec2[0], intsec2[1]);
+    std::vector <std::vector<float>> intsecs = { intsec1, intsec2 };
     return intsecs;
 }
 
-bool Pursuit::inLimit(std::vector<double> startPoint, std::vector<double> endPoint, std::vector<double> sol1) {
+bool Pursuit::inLimit(float startPointX, float startPointY, float endPointX, float endPointY, std::vector<float> sol1) {
     // Check if intersection point lies on the line segment using parametric projection
-    double dx = endPoint[0] - startPoint[0];
-    double dy = endPoint[1] - startPoint[1];
-    double lengthSq = dx*dx + dy*dy;
+    float dx = endPointX - startPointX;
+    float dy = endPointY - startPointY;
+    float lengthSq = dx*dx + dy*dy;
     
     if (lengthSq < 1e-10) {  // Segment is essentially a point
         return false;
     }
     
     // Project sol1 onto the line segment: t = dot(sol1-start, end-start) / |end-start|^2
-    double t = ((sol1[0] - startPoint[0]) * dx + (sol1[1] - startPoint[1]) * dy) / lengthSq;
+    float t = ((sol1[0] - startPointX) * dx + (sol1[1] - startPointY) * dy) / lengthSq;
     
     // Accept if t is between 0 and 1 (point lies on the segment)
     // Use a reasonable tolerance for floating point comparison
-    const double t_tolerance = 0.01; // Allow small overshoot
-    if (t >= -t_tolerance && t <= 1.0 + t_tolerance) {
+    if (t >= -TOLERANCE && t <= 1.0 + TOLERANCE) {
         if (config::debugPursuit) {
             printf("\nPoint:(%.3f,%.3f) ON segment [t:%.3f]", sol1[0], sol1[1], t);
         }
@@ -109,15 +105,29 @@ bool Pursuit::inLimit(std::vector<double> startPoint, std::vector<double> endPoi
     return false;
 }
 
-std::vector<double> Pursuit::updatePursuitPoint() {
+bool Pursuit::inLimit2(std::vector<float> startPoint, std::vector<float> endPoint, std::vector<float> sol1){
+    if (fabsf(distanceSquared(startPoint, sol1) + distanceSquared(sol1, endPoint) - distanceSquared(startPoint, endPoint)) < .05) {
+        return true;
+    }
+    return false;
+}
+bool Pursuit::inLimit2(float startpointX, float startPointY, float endPointX, float endPointY, std::vector<float> sol1){
+    if (fabsf(distanceSquared(startpointX, startPointY, sol1) + distanceSquared(endPointX, endPointY, sol1) - distanceSquared(startpointX, startPointY, endPointX, endPointY)) < .05) {
+        float x = fabsf(distanceSquared(startpointX, startPointY, sol1) + distanceSquared(endPointX, endPointY, sol1) - distanceSquared(startpointX, startPointY, endPointX, endPointY));
+        printf("%.3f", x);
+        return true;
+    }
+    return false;
+}
+std::vector<float> Pursuit::updatePursuitPoint() {
     if(config::debugPursuit){
         printf("\nUpdate pursuit point start");
     }
-    double DisX;
-    double DisY;
-    double DisR;
-    double discrim;
-    double determinant;
+    float DisX;
+    float DisY;
+    float DisR;
+    float discrim;
+    float determinant;
     bool foundSolution = false;
 
     const auto& path = **pathPointer;          // 5/7/25 Derefrences the path vector to increase performance 
@@ -127,7 +137,7 @@ std::vector<double> Pursuit::updatePursuitPoint() {
         printf("\nPOS:(%.3f,%.3f)", position[0],position[1]);
         //std::cout << "Robot Position: (" << position[0] << ", " << position[1] << ")" << std::endl;
     }
-    double distanceToEnd = distance(path[path.size() - 1], position);
+    float distanceToEnd = distance(path[path.size() - 1], position);
     if (config::debugPursuit) {
         printf("Distance to end: %.3f", distanceToEnd);
         //std::cout << "Distance to end: " << distanceToEnd << std::endl;
@@ -140,31 +150,32 @@ std::vector<double> Pursuit::updatePursuitPoint() {
     }
     for (int i = startIndex; i < path.size() - 1; i++) {
         //convert points to local arrays
-        std::vector<double> lPoint0 = { path[i][0] - position[0], path[i][1] - position[1] };
-        std::vector<double> lPoint1 = { path[i + 1][0] - position[0], path[i + 1][1] - position[1] };
+        float lPoint0X = path[i][0] - position[0];
+        float lPoint0Y = path[i][1] - position[1];
+        float lPoint1X = path[i + 1][0] - position[0];
+        float lPoint1Y = path[i + 1][1] - position[1];
         //distance between both X values
-        DisX = lPoint1[0] - lPoint0[0];
+        DisX = lPoint1X - lPoint0X;
         //distance between both Y values
-        DisY = lPoint1[1] - lPoint0[1];
+        DisY = lPoint1Y - lPoint0Y;
         //abs distance between both points
-        DisR = sqrt(pow(DisX, 2) + pow(DisY, 2));
-        discrim = findDiscrim(lPoint0, lPoint1, DisR, determinant);
-        if (discrim <= 0) { continue; } // Discrim being 0 means the circle is not on the line, so it continues to the next point.
+        DisR = sqrtf( (DisX * DisX) + (DisY * DisY) );
+        discrim = findDiscrim(lPoint0X, lPoint0Y, lPoint1X, lPoint1Y, DisR, determinant);
+        if (discrim < 0) { continue; } // Discrim being 0 means the circle is not on the line, so it continues to the next point.
 
         //Function to find where it hit the line
-        std::vector<std::vector<double>> solutionsLocal = hitPoints(lPoint0, lPoint1, discrim, determinant, DisX, DisY, DisR);
+        std::vector<std::vector<float>> solutionsLocal = hitPoints(discrim, determinant, DisX, DisY, DisR);
 
 
         //Checks if the solutions are within the line segment
-        bool solution1InLimit = inLimit(lPoint0, lPoint1, solutionsLocal[0]);
-        bool solution2InLimit = inLimit(lPoint0, lPoint1, solutionsLocal[1]);
+        bool solution1InLimit = inLimit(lPoint0X, lPoint0Y, lPoint1X, lPoint1Y, solutionsLocal[0]);
+        bool solution2InLimit = inLimit(lPoint0X, lPoint0Y, lPoint1X, lPoint1Y, solutionsLocal[1]);
 
 
         //If both are within limits decides what point to go with. Also updates the startIndex variable
         if (solution1InLimit && solution2InLimit) {
-            //Finds the closest point ahead of the robot (not behind)
             //Always prefer the point closer to the end of the segment to progress forward
-            std::vector<double> lclosestPoint = closestPoint(lPoint1, solutionsLocal);
+            std::vector<float> lclosestPoint = closestPoint(lPoint1X, lPoint1Y, solutionsLocal); // Compare both potential solutions to find whatever one is closest to the end segment point
             pursuitPoint[0] = lclosestPoint[0];// Set the local X value for pursuitPoint
             pursuitPoint[1] = lclosestPoint[1];// Set the local Y value for pursuitPoint
 			pursuitPoint[2] = (path[i][2] + path[i+1][2]) / 2; //average max speed of the 2 points
@@ -214,7 +225,7 @@ std::vector<double> Pursuit::updatePursuitPoint() {
             foundSolution = true;
         }
 
-        if((distance(pursuitPoint, path[i+1]) < distance(position, path[i+1])) && foundSolution){ // if pursuitPoint is closer to next point in path than robot
+        if((distanceSquared(pursuitPoint, path[i+1]) < distanceSquared(position, path[i+1])) && foundSolution){ // if pursuitPoint is closer to next point in path than robot
             startIndex = i;
             startIndex = startIndex;
             return pursuitPoint;
