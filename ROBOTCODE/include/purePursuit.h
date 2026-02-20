@@ -41,6 +41,7 @@ private:
     float lookAhead;
 	std::vector<std::vector<float> >** pathPointer; // pointer to the path
 	std::vector<float>* positionPointer; // pointer to the robot position
+    std::vector<std::vector<float>> solutionsLocal;
 
 
     /// @author Zayyyan K
@@ -100,8 +101,18 @@ private:
     /// @param pointX point you want to measure to X value
     /// @param pointY point you want to measure to Y value
     /// @param pointSet points you want to test
-    /// @return the point from the pointset that is closest to point.
-    std::vector<float> closestPoint(float pointX, float pointY, std::vector<std::vector<float> > pointSet) const;
+    /// @return 0 or 1 depending on which of the two are closer
+    int closestPoint(float pointX, float pointY, std::vector<std::vector<float> > pointSet) const;
+
+
+    /// @author Zayyaan K
+    /// @date 2/20/26
+    /// @brief checks to find the closest point using solutionsLocal variable rather than picking a set out, still returns what index is closer
+    /// @param pointX point you want to measure to X value
+    /// @param pointY point you want to measure to Y value
+    /// @return 0 or 1 depending on which of the two are closer
+    int closestSol(float pointX, float pointY) const;
+
 
     /// @author Zayyyan K
     /// @date 4/7/25
@@ -150,7 +161,7 @@ private:
     /// @param distanceY the distance between the 2 y variables, in p1 and p2
     /// @param distance distance between p1 and p2
     /// @return 2 arrays containing both intersections local coordinates
-    std::vector<std::vector<float> > hitPoints(float discrim, float determen, float distanceX, float distanceY, float distance);
+    void hitPoints(float discrim, float determen, float distanceX, float distanceY, float distance);
 
 
 

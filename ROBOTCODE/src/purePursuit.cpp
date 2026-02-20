@@ -11,7 +11,7 @@
 
 
 
-Pursuit::Pursuit(std::vector<std::vector<float>>** p, std::vector<float>* pos, float LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA), pursuitPoint({ 0, 0, 0 ,0, 0}) {}
+Pursuit::Pursuit(std::vector<std::vector<float>>** p, std::vector<float>* pos, float LKA) : pathPointer(p), positionPointer(pos), lookAhead(LKA), pursuitPoint({ 0, 0, 0 ,0, 0}), solutionsLocal(2, std::vector<float>(2)) {}
 
 
 void Pursuit::setLookAhead(float newLKA) {
@@ -35,13 +35,18 @@ float Pursuit::distanceSquared(float pointX, float pointY, std::vector<float> po
 float Pursuit::distanceSquared(float pointX, float pointY, float point1X, float point1Y) const {
     return ((pointX - point1X) * (pointX - point1X) + (pointY - point1Y) * (pointY - point1Y));
 }
-std::vector<float> Pursuit::closestPoint(float pointX, float pointY, std::vector<std::vector<float>> pointSet) const {
+int Pursuit::closestPoint(float pointX, float pointY, std::vector<std::vector<float>> pointSet) const {
     if (distanceSquared(pointX, pointY, pointSet[0]) > distanceSquared(pointX, pointY, pointSet[1])) {
-        return pointSet[1];
+        return 1;
     }
-    return pointSet[0];
+    return 0;
 }
-
+int Pursuit::closestSol(float pointX, float pointY) const {
+    if (distanceSquared(pointX, pointY, solutionsLocal[0]) > distanceSquared(pointX, pointY, solutionsLocal[1])) {
+        return 1;
+    }
+    return 0;
+}
 float Pursuit::findDiscrim(float point0X, float point0Y, float point1X, float point1Y, float dis, float& determen) {
 
     float* determ = &determen;
@@ -59,22 +64,19 @@ float Pursuit::findDiscrim(float point0X, float point0Y, float point1X, float po
     return Discrim;
 }
 
-std::vector<std::vector<float>> Pursuit::hitPoints(float discrim, float determen, float distanceX, float distanceY, float distance) {
+void Pursuit::hitPoints(float discrim, float determen, float distanceX, float distanceY, float distance) { // TODO: mutate 2 vectors rather than declaring like 3 (and 1 more with the return) using pointers 
     float sqrtDiscrim = sqrt(discrim);
     float distanceSquared = distance*distance;
-    std::vector<float> intsec1 = {//Positive Variation
-        //X positive value
-        (determen * distanceY + sign(distanceY) * distanceX * sqrtDiscrim) / distanceSquared,
-        //Y positive value
-        (-determen * distanceX + fabsf(distanceY) * sqrtDiscrim) / distanceSquared };
-    std::vector<float> intsec2 = {//Negative Variation
-        //X negative value
-        (determen * distanceY - sign(distanceY) * distanceX * sqrtDiscrim) / distanceSquared,
-        //Y negative value
-        (-determen * distanceX - fabsf(distanceY) * sqrtDiscrim) / distanceSquared };
-    printf("\n Sol 1: X:%.3f, Y:%.3f \n Sol 2: X:%.3f, Y:%.3f", intsec1[0], intsec1[1], intsec2[0], intsec2[1]);
-    std::vector <std::vector<float>> intsecs = { intsec1, intsec2 };
-    return intsecs;
+    // Positive Variation 
+    solutionsLocal[0][0] = (determen * distanceY + sign(distanceY) * distanceX * sqrtDiscrim) / distanceSquared; //X
+    solutionsLocal[0][1] = (-determen * distanceX + fabsf(distanceY) * sqrtDiscrim) / distanceSquared; // Y
+    
+    // Negative Variation
+    solutionsLocal[1][0] = (-determen * distanceX + fabsf(distanceY) * sqrtDiscrim) / distanceSquared; //X
+    solutionsLocal[1][1] = (-determen * distanceX - fabsf(distanceY) * sqrtDiscrim) / distanceSquared; //Y
+    printf("\n Sol 1: X:%.3f, Y:%.3f \n Sol 2: X:%.3f, Y:%.3f", solutionsLocal[0][0], solutionsLocal[0][1], solutionsLocal[1][0], solutionsLocal[1][1]);
+
+
 }
 
 bool Pursuit::inLimit(float startPointX, float startPointY, float endPointX, float endPointY, std::vector<float> sol1) {
@@ -159,12 +161,12 @@ std::vector<float> Pursuit::updatePursuitPoint() {
         //distance between both Y values
         DisY = lPoint1Y - lPoint0Y;
         //abs distance between both points
-        DisR = sqrtf( (DisX * DisX) + (DisY * DisY) );
+        DisR = sqrtf( (DisX * DisX) + (DisY * DisY) ); // TODO: remove sqrt because all equations that use DisR need it squared. Squaring a sqrt results ni the normal number
         discrim = findDiscrim(lPoint0X, lPoint0Y, lPoint1X, lPoint1Y, DisR, determinant);
         if (discrim < 0) { continue; } // Discrim being 0 means the circle is not on the line, so it continues to the next point.
 
         //Function to find where it hit the line
-        std::vector<std::vector<float>> solutionsLocal = hitPoints(discrim, determinant, DisX, DisY, DisR);
+        hitPoints(discrim, determinant, DisX, DisY, DisR); // change to a static declaration and update
 
 
         //Checks if the solutions are within the line segment
@@ -175,9 +177,9 @@ std::vector<float> Pursuit::updatePursuitPoint() {
         //If both are within limits decides what point to go with. Also updates the startIndex variable
         if (solution1InLimit && solution2InLimit) {
             //Always prefer the point closer to the end of the segment to progress forward
-            std::vector<float> lclosestPoint = closestPoint(lPoint1X, lPoint1Y, solutionsLocal); // Compare both potential solutions to find whatever one is closest to the end segment point
-            pursuitPoint[0] = lclosestPoint[0];// Set the local X value for pursuitPoint
-            pursuitPoint[1] = lclosestPoint[1];// Set the local Y value for pursuitPoint
+            int closestIndex = closestSol(lPoint1X, lPoint1Y); // Compare both potential solutions to find whatever one is closest to the end segment point
+            pursuitPoint[0] = solutionsLocal[closestIndex][0];// Set the local X value for pursuitPoint
+            pursuitPoint[1] = solutionsLocal[closestIndex][1];// Set the local Y value for pursuitPoint
 			pursuitPoint[2] = (path[i][2] + path[i+1][2]) / 2; //average max speed of the 2 points
             pursuitPoint[3] = (path[i][3] + path[i+1][3]) / 2; //average max speed of the 2 points
             pursuitPoint[4] = (path[i+1][4]);
@@ -231,6 +233,7 @@ std::vector<float> Pursuit::updatePursuitPoint() {
             return pursuitPoint;
         }
         else if(foundSolution){
+            foundSolution = false;
             startIndex += 1;
         }
         else{
